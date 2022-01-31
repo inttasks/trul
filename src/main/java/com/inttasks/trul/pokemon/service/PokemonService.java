@@ -3,6 +3,7 @@ package com.inttasks.trul.pokemon.service;
 import com.inttasks.trul.pokemon.client.PokeAPI;
 import com.inttasks.trul.pokemon.dto.SpeciesResp;
 import com.inttasks.trul.pokemon.model.PokemonInfo;
+import com.inttasks.trul.translator.service.PokemonTranslator;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
@@ -16,9 +17,11 @@ import static com.inttasks.trul.common.Constants.EN_LANG;
 public class PokemonService {
 
   private final PokeAPI pokeAPI;
+  private final PokemonTranslator pokemonTranslator;
 
-  public PokemonService(PokeAPI pokeAPI) {
+  public PokemonService(PokeAPI pokeAPI, PokemonTranslator pokemonTranslator) {
     this.pokeAPI = pokeAPI;
+    this.pokemonTranslator = pokemonTranslator;
   }
 
   public Mono<PokemonInfo> getPokemon(String name) {
@@ -28,6 +31,11 @@ public class PokemonService {
             return Mono.just(SpeciesResp.builder().build());
           return pokeAPI.getSpecies(p.getSpecies().getUrl());
         }, this::addSpeciesInfo);
+  }
+
+  public Mono<PokemonInfo> getPokemonTranslated(String name) {
+    return getPokemon(name)
+        .flatMap(pokemonTranslator::translate);
   }
 
   private PokemonInfo addSpeciesInfo(PokemonInfo pokemonInfo, SpeciesResp speciesResp) {

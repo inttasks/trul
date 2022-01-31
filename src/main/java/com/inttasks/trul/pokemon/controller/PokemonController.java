@@ -23,4 +23,9 @@ public class PokemonController {
   private  Mono<PokemonInfo> getPokemon(@PathVariable String name) {
     return pokemonService.getPokemon(name);
   }
+
+  @GetMapping("/translated/{name}")
+  private  Mono<PokemonInfo> getPokemonTranslated(@PathVariable String name) {
+    return pokemonService.getPokemonTranslated(name);
+  }
 }

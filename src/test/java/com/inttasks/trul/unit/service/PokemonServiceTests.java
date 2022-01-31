@@ -5,10 +5,13 @@ import com.inttasks.trul.pokemon.client.PokeAPI;
 import com.inttasks.trul.pokemon.dto.SpeciesResp;
 import com.inttasks.trul.pokemon.model.PokemonInfo;
 import com.inttasks.trul.pokemon.service.PokemonService;
+import com.inttasks.trul.translator.client.FunTranslationsAPI;
+import com.inttasks.trul.translator.dto.FunTranslationsResp;
 import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
@@ -28,12 +31,16 @@ public class PokemonServiceTests {
   private static final String POKE = "poke";
   private static final String DESC1 = "first description";
   private static final String DESC2 = "Second description";
+  private static final String TRANSLATE2 = "Second translation";
 
   @SpyBean
   private PokeAPI pokeAPI;
 
   @Autowired
   private PokemonService pokemonService;
+
+  @MockBean
+  private FunTranslationsAPI funTranslationsAPI;
 
   @Test
   void getPokemon_success() {
@@ -87,6 +94,35 @@ public class PokemonServiceTests {
         .verify();
   }
 
+  @Test
+  void getPokemonTranslated_cave_success() {
+    when(pokeAPI.getPokemonBasicInfo(any())).thenReturn(generateBasicPokemonInfo());
+    when(pokeAPI.getSpecies(any())).thenReturn(generateNoneLegendaryCaveHabitatSpeciesResp());
+    when(funTranslationsAPI.translate(any(), any())).thenReturn(Mono.just(new FunTranslationsResp(new FunTranslationsResp.Contents(TRANSLATE2))));
+    StepVerifier.create(pokemonService.getPokemonTranslated(POKE))
+        .assertNext(p -> {
+          assertEquals(POKE, p.getName());
+          assertEquals(TRANSLATE2, p.getDescription());
+        })
+        .verifyComplete();
+  }
+
+  @Test
+  void getPokemonTranslated_legendary_success() {
+    when(pokeAPI.getPokemonBasicInfo(any())).thenReturn(generateBasicPokemonInfo());
+    when(pokeAPI.getSpecies(any())).thenReturn(generateNoneLegendaryCaveHabitatSpeciesResp().map(p -> {
+      p.setLegendary(true);
+      p.setHabitat(new SpeciesResp.Habitat("Home"));
+      return p;
+    }));
+    when(funTranslationsAPI.translate(any(), any())).thenReturn(Mono.just(new FunTranslationsResp(new FunTranslationsResp.Contents(TRANSLATE2))));
+    StepVerifier.create(pokemonService.getPokemonTranslated(POKE))
+        .assertNext(p -> {
+          assertEquals(POKE, p.getName());
+          assertEquals(TRANSLATE2, p.getDescription());
+        })
+        .verifyComplete();
+  }
 
   private Mono<PokemonInfo> generateBasicPokemonInfo() {
     return Mono.just(PokemonInfo.builder()
