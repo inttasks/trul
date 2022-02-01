@@ -76,7 +76,7 @@ This way you probably won't have a folder with many classes under it, and if cod
 #Tests
 There are two unit test files for each of Services that contains multiple tests for each of them, covering various failure and success scenarios.
 There are also few simple integrated tests that starts from controller with mocked third parties API. Adding not mocked API test are also actually very easy in this case but decided against it so the tests be self-contained.
-It won't be a bad idea to have some contract tests as well.
+It won't be a bad idea to have some contract tests as well. Overall 14 tests have been written.
 
 
 

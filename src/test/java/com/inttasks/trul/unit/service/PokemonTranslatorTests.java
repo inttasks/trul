@@ -88,11 +88,10 @@ public class PokemonTranslatorTests {
     PokemonInfo pokemonInfo = generateBasicPokemonInfo();
     pokemonInfo.setLegendary(true);
     StepVerifier.create(pokemonTranslator.translate(pokemonInfo))
-        .expectErrorSatisfies(e -> {
-          assertEquals(ResponseStatusException.class, e.getClass());
-          assertEquals(((ResponseStatusException) e).getRawStatusCode(), 503);
+        .assertNext(p -> {
+          assertEquals(DESC2, p.getDescription());
         })
-        .verify();
+        .verifyComplete();
   }
 
 

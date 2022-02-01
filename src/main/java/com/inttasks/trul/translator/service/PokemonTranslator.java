@@ -30,16 +30,12 @@ public class PokemonTranslator {
           pokemonInfo.setDescription(resp.getContents().getTranslated());
           return pokemonInfo;
         })
-        .onErrorResume(WebClientResponseException.class, this::handleError);
+        .onErrorReturn(pokemonInfo);
   }
 
   private TranslatorType getTranslatorType(PokemonInfo pokemonInfo) {
     if (pokemonInfo.isLegendary() || CAVE.equals(pokemonInfo.getHabitat()))
       return TranslatorType.YODA;
     return TranslatorType.SHAKESPEARE;
-  }
-
-  private Mono<PokemonInfo> handleError(WebClientResponseException e) {
-    return Mono.error(new ResponseStatusException(e.getStatusCode(), e.getMessage()));
   }
 }
