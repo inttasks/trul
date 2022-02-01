@@ -4,8 +4,6 @@ import com.inttasks.trul.pokemon.model.PokemonInfo;
 import com.inttasks.trul.translator.client.FunTranslationsAPI;
 import com.inttasks.trul.translator.enums.TranslatorType;
 import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
-import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Mono;
 
 import java.util.Objects;

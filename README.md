@@ -1,7 +1,8 @@
 # How to run
+make sure port 5000 is free, or please change docker-compose.yml.
 ```
 To start server :  ./start.sh
-If the file does not permission to run: chmod +x start.sh
+If the file does not have permission to run: chmod +x start.sh
 To stop: docker-compose down 
 ```
 Start uses docker and docker-compose, but it uses multi-stage docker and builds java project inside stage one.
@@ -11,7 +12,7 @@ After server starts you can run specified REST APIs in the task.
 
 Note on Dockerfile: for both stages it uses same base image to reduce number of images it downloads but for production it is better to use a lightweight image for running the server in second stage.
 
-#Design Decisions
+# Design Decisions
 Based on project's description we kinda want to build a system that enriches data in multiple stages.
 So ideally I would have liked to implement a pipeline or chain of responsibility architecture. 
 But here because of the scope, current implementation only partially does that and each step calls the next step in a more hard coded way but also in a reactive manner.
@@ -25,7 +26,7 @@ At first, I had implemented with more abstraction with a common interface and us
 which can be implemented by simple function that decides which strategy needs to be chosen. For more complex scenario it is better to avoid this approach as this will create a complex and nested conditional flows.
 As stated the better approach is each strategy decides if it needs to be applied or not, or have some sort of hashing mechanism that can access required strategy without going into complex and nested conditions.
 
-#Folder Structure
+# Folder Structure
 ```
 .
 ├── src
@@ -59,21 +60,21 @@ I think one of the most important things in structuring code is to follow same c
 - controller: if package need controller, those classes go there
 - client: contains code for third parties client and APIs. You can extract some clients to common package or have separate package for clients that are used by more than one package. 
 - dto: dto objects reside there
-- model: any model/dao object goes here. Depend on the project you may not to have an object that serves both as model and dto.
+- model: any model/dao object goes here. Depend on the project you may not to have an object that serves both as model and dto. This project does not need a model or dao but for sake of presentation I added one, and it can be used for future improvement as well.
 - service: contains services that handle service layer logic. Services are usually connect different part of code to each other, so it is a good place to understand the code.
 - enums: contains enum types
 
 The main reason for this structuring is to encapsulate and isolate different parts of code from each other based on their responsibilities and have some separation in order to make finding related things easier.
 This way you probably won't have a folder with many classes under it, and if code still goes that way it would be better to organize classes with more related domain in a lower level sub-folders.
 
-#Production API Improvements
+# Production API Improvements
 - An API versioning is recommended. So future changes can be integrated easier.
 - The GET /pokemon/translated/:name is better to be changed to /pokemon/:name/translate
 - Caching is probably needed as the logic is heavily reliant on third parties with limited rate and performance.
 - If the enrichment process is done in multiple stages, and some later stages are failing, we might want to add circuit breakers to reduce costs and side effects. For example only allow few queries to go to third parties to first reduce our cost of consuming healthy ones and also putting less pressure on non-healthy ones.
 - Also, failure cases should be discussed. So if one stage fails what will happen to the result. Should an incomplete result to be returned, or we should return an error, and how will that error look like?
 
-#Tests
+# Tests
 There are two unit test files for each of Services that contains multiple tests for each of them, covering various failure and success scenarios.
 There are also few simple integrated tests that starts from controller with mocked third parties API. Adding not mocked API test are also actually very easy in this case but decided against it so the tests be self-contained.
 It won't be a bad idea to have some contract tests as well. Overall 14 tests have been written.
